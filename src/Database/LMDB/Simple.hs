@@ -71,6 +71,7 @@ module Database.LMDB.Simple
   , get
   , put
   , clear
+  , closeDatabase
 
     -- * Access modes
   , ReadWrite
@@ -112,6 +113,7 @@ import Database.LMDB.Raw
   , mdb_env_set_maxdbs
   , mdb_env_set_maxreaders
   , mdb_dbi_open'
+  , mdb_dbi_close'
   , mdb_txn_begin
   , mdb_txn_commit
   , mdb_txn_abort
@@ -357,3 +359,7 @@ put db key = maybe (void $ Internal.delete db key) (Internal.put db key)
 -- | Delete all key/value pairs from a database, leaving the database empty.
 clear :: Database k v -> Transaction ReadWrite ()
 clear (Db _ dbi) = Txn $ \txn -> mdb_clear' txn dbi
+
+-- | Close the database
+closeDatabase :: Database k v -> IO ()
+closeDatabase (Db env dbi) = mdb_dbi_close' env dbi
